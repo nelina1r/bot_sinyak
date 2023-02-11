@@ -1,5 +1,6 @@
 package ru.dedov.botsinyak.service;
 
+import com.vdurmont.emoji.EmojiParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -77,7 +78,6 @@ public class BotService extends TelegramLongPollingBot {
         }
     }
 
-
     public void doSurvey(Update update) throws TelegramApiException {
         String userId = update.getCallbackQuery().getMessage().getChatId().toString();
         User user = userService.findUserById(Long.parseLong(userId));
@@ -113,15 +113,15 @@ public class BotService extends TelegramLongPollingBot {
         InlineKeyboardButton inlineKeyboardButton3 = new InlineKeyboardButton();
         InlineKeyboardButton inlineKeyboardButton4 = new InlineKeyboardButton();
         InlineKeyboardButton inlineKeyboardButton5 = new InlineKeyboardButton();
-        inlineKeyboardButton1.setText("-2");
+        inlineKeyboardButton1.setText(EmojiParser.parseToUnicode(":rage:"));
         inlineKeyboardButton1.setCallbackData("-2");
-        inlineKeyboardButton2.setText("-1");
+        inlineKeyboardButton2.setText(EmojiParser.parseToUnicode(":confused:"));
         inlineKeyboardButton2.setCallbackData("-1");
-        inlineKeyboardButton3.setText("0");
+        inlineKeyboardButton3.setText(EmojiParser.parseToUnicode(":neutral_face:"));
         inlineKeyboardButton3.setCallbackData("0");
-        inlineKeyboardButton4.setText("1");
+        inlineKeyboardButton4.setText(EmojiParser.parseToUnicode(":blush:"));
         inlineKeyboardButton4.setCallbackData("1");
-        inlineKeyboardButton5.setText("2");
+        inlineKeyboardButton5.setText(EmojiParser.parseToUnicode(":grinning:"));
         inlineKeyboardButton5.setCallbackData("2");
         List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
         keyboardButtonsRow1.add(inlineKeyboardButton1);
