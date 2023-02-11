@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/SurveyDB
+    username: postgres
+    password: postgres
+  jpa:
+    generate-ddl: true
+    show-sql: true
+    properties:
+      hibernate:
+        enable_lazy_load_no_trans: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        ddl-auto: create
+        jdbc:
+          lob:
+            non_contextual_creation: true
+
+bot:
+  name: seenyak_bot
+  token: yasgvbeiwfuhnoajmwipok,efawuoesnmifjpo,k
+
+
