@@ -11,15 +11,12 @@ public class MessagesHolder {
     public static final String START_SURVEY_MESSAGE = "Перед прохождением опроса убедитесь что вы не беременны";
 
     public static final String[] QUESTIONS = {
-            "vopros1",
-            "vopros2",
-            "vopros3",
-            "vopros4",
-            "vopros5",
-            "vopros6",
-            "vopros7",
-            "vopros8",
-            "vopros9"
+            "Планы на вечер",
+            "Компания собутыльников",
+            "Место",
+            "Закуски",
+            "Возраст",
+            "Количество денег"
     };
 
     public static final String RESULT_TEXT_MESSAGE = "Ваш результат - ";

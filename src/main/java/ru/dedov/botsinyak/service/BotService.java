@@ -4,7 +4,6 @@ import com.vdurmont.emoji.EmojiParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -78,24 +77,59 @@ public class BotService extends TelegramLongPollingBot {
         }
     }
 
+
     public void doSurvey(Update update) throws TelegramApiException {
         String userId = update.getCallbackQuery().getMessage().getChatId().toString();
         User user = userService.findUserById(Long.parseLong(userId));
-        if (userService.findUserById(Long.parseLong(userId)).getAnswers().size() <= 9) {
-            Answer answer = new Answer();
-            answer.setValue(Long.parseLong(update.getCallbackQuery().getData()));
-            answerService.saveAnswer(answer);
-            Set<Answer> answerSet = user.getAnswers();
-            answerSet.add(answer);
-            user.setAnswers(answerSet);
-            userService.saveUser(user);
-            if (userService.findUserById(Long.parseLong(userId)).getAnswers().size() == 10)
-                doResults(Long.parseLong(userId), update.getCallbackQuery().getMessage().getChatId());
-            else
-                execute(sendSurveyQuestionMessage(userId, MessagesHolder.QUESTIONS[userService.findUserById(Long.parseLong(userId)).getAnswers().size() - 1]));
-        } else {
-            doResults(Long.parseLong(userId), update.getCallbackQuery().getMessage().getChatId());
+        switch (userService.findUserById(Long.parseLong(userId)).getAnswers().size()) {
+            case 0 -> {
+                sendSurveyQuestionMessage(userId, MessagesHolder.QUESTIONS[0],
+                        "Люблю алкоголь", "Отметить событие", "Хочу отдохнуть", "Меня уволили",
+                        "0", "100", "500", "5000");
+                saveUserAnswer(update, user);
+            }
+            case 1 -> {
+                sendSurveyQuestionMessage(userId, MessagesHolder.QUESTIONS[1],
+                        "Одинокий альфа", "Я и девушка", "Семейный круг", "С мужиками",
+                        "5000", "100", "500", "0");
+                saveUserAnswer(update, user);
+            }
+            case 2 -> {
+                sendSurveyQuestionMessage(userId, MessagesHolder.QUESTIONS[2],
+                        "Дома", "У друзей", "В бане", "Бар",
+                        "5000", "100", "500", "0");
+                saveUserAnswer(update, user);
+            }
+            case 3 -> {
+                sendSurveyQuestionMessage(userId, MessagesHolder.QUESTIONS[3],
+                        "Малосольный огурчик", "Раки", "Сырная нарезка", "Селедка",
+                        "5000", "100", "500", "0");
+                saveUserAnswer(update, user);
+            }
+            case 4 -> {
+                sendSurveyQuestionMessage(userId, MessagesHolder.QUESTIONS[4],
+                        "0-18", "19-22", "23-45", "46+",
+                        "5000", "100", "500", "0");
+                saveUserAnswer(update, user);
+            }
+            case 5 -> {
+                sendSurveyQuestionMessage(userId, MessagesHolder.QUESTIONS[5],
+                        "0", "до 1500", "1501-5000", "Я программист",
+                        "5000", "100", "500", "0");
+                saveUserAnswer(update, user);
+            }
+            default -> doResults(Long.parseLong(userId), update.getCallbackQuery().getMessage().getChatId());
         }
+    }
+
+    private void saveUserAnswer(Update update, User user) {
+        Answer answer = new Answer();
+        answer.setValue(Long.parseLong(update.getCallbackQuery().getData()));
+        answerService.saveAnswer(answer);
+        Set<Answer> answerSet = user.getAnswers();
+        answerSet.add(answer);
+        user.setAnswers(answerSet);
+        userService.saveUser(user);
     }
 
     private void doResults(Long userId, Long chatId) throws TelegramApiException {
@@ -106,37 +140,41 @@ public class BotService extends TelegramLongPollingBot {
         sendMessage(chatId, MessagesHolder.RESULT_TEXT_MESSAGE + " " + result);
     }
 
-    public SendMessage sendSurveyQuestionMessage(String chatId, String message) {
+    public void sendSurveyQuestionMessage(String chatId, String message,
+                                          String buttonText1, String buttonText2, String buttonText3, String buttonText4,
+                                          String buttonScore1, String buttonScore2, String buttonScore3, String buttonScore4) throws TelegramApiException {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         InlineKeyboardButton inlineKeyboardButton1 = new InlineKeyboardButton();
         InlineKeyboardButton inlineKeyboardButton2 = new InlineKeyboardButton();
         InlineKeyboardButton inlineKeyboardButton3 = new InlineKeyboardButton();
         InlineKeyboardButton inlineKeyboardButton4 = new InlineKeyboardButton();
-        InlineKeyboardButton inlineKeyboardButton5 = new InlineKeyboardButton();
-        inlineKeyboardButton1.setText(EmojiParser.parseToUnicode(":rage:"));
-        inlineKeyboardButton1.setCallbackData("-2");
-        inlineKeyboardButton2.setText(EmojiParser.parseToUnicode(":confused:"));
-        inlineKeyboardButton2.setCallbackData("-1");
-        inlineKeyboardButton3.setText(EmojiParser.parseToUnicode(":neutral_face:"));
-        inlineKeyboardButton3.setCallbackData("0");
-        inlineKeyboardButton4.setText(EmojiParser.parseToUnicode(":blush:"));
-        inlineKeyboardButton4.setCallbackData("1");
-        inlineKeyboardButton5.setText(EmojiParser.parseToUnicode(":grinning:"));
-        inlineKeyboardButton5.setCallbackData("2");
+        inlineKeyboardButton1.setText(buttonText1);
+        inlineKeyboardButton1.setCallbackData(buttonScore1);
+        inlineKeyboardButton2.setText(buttonText2);
+        inlineKeyboardButton2.setCallbackData(buttonScore2);
+        inlineKeyboardButton3.setText(buttonText3);
+        inlineKeyboardButton3.setCallbackData(buttonScore3);
+        inlineKeyboardButton4.setText(buttonText4);
+        inlineKeyboardButton4.setCallbackData(buttonScore4);
         List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
+        List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
+        List<InlineKeyboardButton> keyboardButtonsRow3= new ArrayList<>();
+        List<InlineKeyboardButton> keyboardButtonsRow4 = new ArrayList<>();
         keyboardButtonsRow1.add(inlineKeyboardButton1);
-        keyboardButtonsRow1.add(inlineKeyboardButton2);
-        keyboardButtonsRow1.add(inlineKeyboardButton3);
-        keyboardButtonsRow1.add(inlineKeyboardButton4);
-        keyboardButtonsRow1.add(inlineKeyboardButton5);
+        keyboardButtonsRow2.add(inlineKeyboardButton2);
+        keyboardButtonsRow3.add(inlineKeyboardButton3);
+        keyboardButtonsRow4.add(inlineKeyboardButton4);
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         rowList.add(keyboardButtonsRow1);
+        rowList.add(keyboardButtonsRow2);
+        rowList.add(keyboardButtonsRow3);
+        rowList.add(keyboardButtonsRow4);
         inlineKeyboardMarkup.setKeyboard(rowList);
-        return SendMessage.builder()
+        execute(SendMessage.builder()
                 .chatId(String.valueOf(chatId))
                 .text(message)
                 .replyMarkup(inlineKeyboardMarkup)
-                .build();
+                .build());
     }
 
     private void startSurvey(Update update) throws TelegramApiException {
